@@ -51,14 +51,33 @@ class _MoodsPageState extends State<MoodsPage> {
 
     try {
       await widget.repository.addMood(
-        nombre: result.nombre,
-        emocion: result.emocion,
+        nombre: result.nombre!,
+        emocion: result.emocion!,
         nota: result.nota,
       );
       _showSnackBar('Estado de ánimo creado correctamente.');
     } catch (e, st) {
       AppLogger.error('Error al crear estado de ánimo', error: e, stackTrace: st);
       _showSnackBar('No se pudo crear el estado de ánimo.');
+    }
+  }
+
+  Future<void> _editMoodNote(MoodModel mood) async {
+    final result = await showDialog<MoodFormResult>(
+      context: context,
+      builder: (_) => MoodFormDialog(mood: mood),
+    );
+    if (result == null) return;
+
+    try {
+      await widget.repository.updateMoodNote(
+        mood: mood,
+        nota: result.nota,
+      );
+      _showSnackBar('Nota actualizada correctamente.');
+    } catch (e, st) {
+      AppLogger.error('Error al actualizar la nota', error: e, stackTrace: st);
+      _showSnackBar('No se pudo actualizar la nota.');
     }
   }
 
@@ -193,7 +212,10 @@ class _MoodsPageState extends State<MoodsPage> {
 
           return ListView.builder(
             itemCount: moods.length,
-            itemBuilder: (_, i) => MoodTile(mood: moods[i]),
+            itemBuilder: (_, i) => MoodTile(
+              mood: moods[i],
+              onEdit: () => _editMoodNote(moods[i]),
+            ),
           );
         },
       ),

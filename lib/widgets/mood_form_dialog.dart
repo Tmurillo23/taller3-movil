@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
 
-class MoodFormResult {
-  final String nombre;
-  final String emocion;
-  final String? nota;
+import '../models/mood_model.dart';
 
-  const MoodFormResult({
+class MoodFormResult {
+  final String? nombre;
+  final String? emocion;
+  final String? nota;
+  final bool isEdit;
+
+  const MoodFormResult.create({
     required this.nombre,
     required this.emocion,
     this.nota,
-  });
+  }) : isEdit = false;
+
+  const MoodFormResult.edit({
+    this.nota,
+  })  : nombre = null,
+        emocion = null,
+        isEdit = true;
 }
 
 class MoodFormDialog extends StatefulWidget {
-  const MoodFormDialog({super.key});
+  final MoodModel? mood;
+
+  const MoodFormDialog({super.key, this.mood});
+
+  bool get isEditMode => mood != null;
 
   @override
   State<MoodFormDialog> createState() => _MoodFormDialogState();
@@ -45,45 +58,54 @@ class _MoodFormDialogState extends State<MoodFormDialog> {
 
     Navigator.pop(
       context,
-      MoodFormResult(
-        nombre: _nombreController.text.trim(),
-        emocion: _emocionSeleccionada,
-        nota: _notaController.text.trim().isEmpty
-            ? null
-            : _notaController.text.trim(),
-      ),
+      widget.isEditMode
+          ? MoodFormResult.edit(
+              nota: _notaController.text.trim().isEmpty
+                  ? null
+                  : _notaController.text.trim(),
+            )
+          : MoodFormResult.create(
+              nombre: _nombreController.text.trim(),
+              emocion: _emocionSeleccionada,
+              nota: _notaController.text.trim().isEmpty
+                  ? null
+                  : _notaController.text.trim(),
+            ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Nuevo estado de ánimo'),
+      title: Text(widget.isEditMode ? 'Editar nota' : 'Nuevo estado de ánimo'),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextFormField(
-              controller: _nombreController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Ingrese un nombre';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: _emocionSeleccionada,
-              decoration: const InputDecoration(labelText: 'Emoción'),
-              items: _emociones
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (value) => setState(() => _emocionSeleccionada = value!),
-            ),
-            const SizedBox(height: 12),
+            if (!widget.isEditMode) ...[
+              TextFormField(
+                controller: _nombreController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Ingrese un nombre';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _emocionSeleccionada,
+                decoration: const InputDecoration(labelText: 'Emoción'),
+                items: _emociones
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (value) =>
+                    setState(() => _emocionSeleccionada = value!),
+              ),
+              const SizedBox(height: 12),
+            ],
             TextFormField(
               controller: _notaController,
               decoration: const InputDecoration(labelText: 'Nota (opcional)'),
@@ -99,7 +121,7 @@ class _MoodFormDialogState extends State<MoodFormDialog> {
         ),
         ElevatedButton(
           onPressed: _submit,
-          child: const Text('Guardar'),
+          child: Text(widget.isEditMode ? 'Guardar cambios' : 'Guardar'),
         ),
       ],
     );

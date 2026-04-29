@@ -4,10 +4,12 @@ import '../models/mood_model.dart';
 
 class MoodTile extends StatelessWidget {
   final MoodModel mood;
+  final VoidCallback? onEdit;
 
   const MoodTile({
     super.key,
     required this.mood,
+    this.onEdit,
   });
 
   @override
@@ -23,6 +25,11 @@ class MoodTile extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
+        ),
+        trailing: IconButton(
+          tooltip: 'Editar nota',
+          onPressed: onEdit,
+          icon: const Icon(Icons.edit_outlined),
         ),
 
         subtitle: Column(

@@ -54,6 +54,39 @@ class MoodRepository {
     }
   }
 
+  Future<void> updateMoodNote({
+    required MoodModel mood,
+    required String? nota,
+  }) async {
+    if (mood.id == null) {
+      AppLogger.warning('No se puede actualizar un estado de ánimo sin id');
+      return;
+    }
+
+    AppLogger.info('Actualizando nota del estado de ánimo: ${mood.id}');
+    final updatedMood = mood.copyWith(
+      nota: nota,
+      pendingSync: true,
+    );
+
+    await localDb.updateMood(updatedMood);
+
+    try {
+      await remoteService.upsertMood(updatedMood);
+      await localDb.markAsSynced(updatedMood.id!);
+      AppLogger.info('Nota sincronizada correctamente: ${updatedMood.id}');
+    } catch (e, st) {
+      AppLogger.warning(
+        'La nota se actualizó localmente, pendiente de sincronización',
+      );
+      AppLogger.error(
+        'Error al sincronizar la nota actualizada',
+        error: e,
+        stackTrace: st,
+      );
+    }
+  }
+
   Future<void> deleteMood(int id) async {
     AppLogger.info('Eliminando estado de ánimo: $id');
     await localDb.deleteMood(id);
