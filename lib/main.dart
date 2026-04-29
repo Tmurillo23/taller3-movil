@@ -25,13 +25,16 @@ Future<void> main() async {
       );
       runApp(MyApp(repository: repository));
     },
-    (error, stack) => AppLogger.error('Error global no controlado', error: error, stackTrace: stack),
+    (error, stack) => AppLogger.error(
+      'Error global no controlado',
+      error: error,
+      stackTrace: stack,
+    ),
   );
 }
 
 class MyApp extends StatelessWidget {
   final MoodRepository repository;
-
   const MyApp({super.key, required this.repository});
 
   @override

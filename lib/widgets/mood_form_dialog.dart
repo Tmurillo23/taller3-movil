@@ -5,7 +5,11 @@ class MoodFormResult {
   final String emocion;
   final String? nota;
 
-  const MoodFormResult({required this.nombre, required this.emocion, this.nota});
+  const MoodFormResult({
+    required this.nombre,
+    required this.emocion,
+    this.nota,
+  });
 }
 
 class MoodFormDialog extends StatefulWidget {
@@ -20,7 +24,14 @@ class _MoodFormDialogState extends State<MoodFormDialog> {
   final _notaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String _emocionSeleccionada = 'Feliz';
-  final List<String> _emociones = ['Feliz', 'Triste', 'Enojado', 'Ansioso', 'Cansado'];
+
+  final List<String> _emociones = [
+    'Feliz',
+    'Triste',
+    'Enojado',
+    'Ansioso',
+    'Cansado',
+  ];
 
   @override
   void dispose() {
@@ -31,12 +42,15 @@ class _MoodFormDialogState extends State<MoodFormDialog> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
+
     Navigator.pop(
       context,
       MoodFormResult(
         nombre: _nombreController.text.trim(),
         emocion: _emocionSeleccionada,
-        nota: _notaController.text.trim().isEmpty ? null : _notaController.text.trim(),
+        nota: _notaController.text.trim().isEmpty
+            ? null
+            : _notaController.text.trim(),
       ),
     );
   }
@@ -53,14 +67,21 @@ class _MoodFormDialogState extends State<MoodFormDialog> {
             TextFormField(
               controller: _nombreController,
               decoration: const InputDecoration(labelText: 'Nombre'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingrese un nombre' : null,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Ingrese un nombre';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _emocionSeleccionada,
+              initialValue: _emocionSeleccionada,
               decoration: const InputDecoration(labelText: 'Emoción'),
-              items: _emociones.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-              onChanged: (v) => setState(() => _emocionSeleccionada = v!),
+              items: _emociones
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+              onChanged: (value) => setState(() => _emocionSeleccionada = value!),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -72,8 +93,14 @@ class _MoodFormDialogState extends State<MoodFormDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-        ElevatedButton(onPressed: _submit, child: const Text('Guardar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _submit,
+          child: const Text('Guardar'),
+        ),
       ],
     );
   }

@@ -43,15 +43,20 @@ class MoodRepository {
         AppLogger.info('Sincronización exitosa: ${inserted.id}');
       }
     } catch (e, st) {
-      AppLogger.warning('Estado de ánimo guardado localmente, pendiente de sincronización');
-      AppLogger.error('Error al sincronizar nuevo estado de ánimo', error: e, stackTrace: st);
+      AppLogger.warning(
+        'Estado de ánimo guardado localmente, pendiente de sincronización',
+      );
+      AppLogger.error(
+        'Error al sincronizar nuevo estado de ánimo',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 
   Future<void> deleteMood(int id) async {
     AppLogger.info('Eliminando estado de ánimo: $id');
     await localDb.deleteMood(id);
-    // Opcional: también podrías eliminarlo de Firebase, pero por ahora mantenemos local.
   }
 
   Future<void> refreshFromRemote() async {
@@ -61,9 +66,15 @@ class MoodRepository {
       for (final mood in remoteMoods) {
         await localDb.upsertFromRemote(mood);
       }
-      AppLogger.info('Refresco completado. Documentos procesados: ${remoteMoods.length}');
+      AppLogger.info(
+        'Refresco completado. Documentos procesados: ${remoteMoods.length}',
+      );
     } catch (e, st) {
-      AppLogger.error('Error al obtener datos remotos', error: e, stackTrace: st);
+      AppLogger.error(
+        'Error al obtener datos remotos',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 
@@ -79,47 +90,12 @@ class MoodRepository {
           AppLogger.info('Sincronizado: ${mood.id}');
         }
       } catch (e, st) {
-        AppLogger.error('Error sincronizando pendiente ${mood.id}', error: e, stackTrace: st);
+        AppLogger.error(
+          'Error sincronizando pendiente ${mood.id}',
+          error: e,
+          stackTrace: st,
+        );
       }
     }
-  }
-
-  // Métodos QA (solo en debug)
-  Future<void> qaCreateMoodWithPermissionDenied() async {
-    AppLogger.info('QA: simulando permission-denied');
-    remoteService.simulatePermissionDeniedOnce();
-    await addMood(nombre: 'QA', emocion: 'Feliz', nota: 'Permiso denegado');
-  }
-
-  Future<void> qaCreateMoodWithNetworkError() async {
-    AppLogger.info('QA: simulando error de red');
-    remoteService.simulateNetworkErrorOnce();
-    await addMood(nombre: 'QA', emocion: 'Triste', nota: 'Error de red');
-  }
-
-  Future<void> qaCreateMoodWithUnexpectedError() async {
-    AppLogger.info('QA: simulando error inesperado');
-    remoteService.simulateUnexpectedErrorOnce();
-    await addMood(nombre: 'QA', emocion: 'Ansioso', nota: 'Error inesperado');
-  }
-
-  Future<void> qaCreateLongTextMood() async {
-    AppLogger.info('QA: creando texto largo');
-    await addMood(
-      nombre: 'QA - Nombre extremadamente largo para probar overflow visual y diseño',
-      emocion: 'Cansado',
-      nota: 'Nota larga: ${'texto ' * 100}'
-    );
-  }
-
-  Future<void> qaSimulateSlowOperation() async {
-    AppLogger.info('QA: operación lenta');
-    await Future.delayed(const Duration(seconds: 3));
-    AppLogger.info('QA: operación lenta finalizada');
-  }
-
-  Future<void> qaThrowUnexpectedUiError() async {
-    AppLogger.info('QA: lanzando error inesperado');
-    throw StateError('QA: error inesperado simulado desde UI');
   }
 }
