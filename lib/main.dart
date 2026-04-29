@@ -1,19 +1,38 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'pages/mood_page.dart';
-import 'widgets/mood_note.dart'; // ← tu página de agregar
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'data/app_database.dart';
+import 'services/app_logger.dart';
+import 'services/mood_remote_service.dart';
+import 'services/mood_repository.dart';
+import 'pages/mood_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  runZonedGuarded(
+    () async {
+      AppLogger.info('Inicializando Mood App');
+      final database = AppDatabase();
+      final remoteService = MoodRemoteService();
+      final repository = MoodRepository(
+        localDb: database,
+        remoteService: remoteService,
+      );
+      runApp(MyApp(repository: repository));
+    },
+    (error, stack) => AppLogger.error('Error global no controlado', error: error, stackTrace: stack),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final MoodRepository repository;
+
+  const MyApp({super.key, required this.repository});
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +41,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MoodsPage(),
-      routes: {
-        '/add': (context) => const MoodNote(), // ← ajusta el nombre de la clase
-      },
+      home: MoodsPage(repository: repository),
     );
   }
 }

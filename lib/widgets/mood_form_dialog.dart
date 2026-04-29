@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
-import '../models/mood_model.dart';
 
-class MoodNote extends StatefulWidget {
-  const MoodNote({super.key});
+class MoodFormResult {
+  final String nombre;
+  final String emocion;
+  final String? nota;
 
-  @override
-  State<MoodNote> createState() => _MoodNoteState();
+  const MoodFormResult({required this.nombre, required this.emocion, this.nota});
 }
 
-class _MoodNoteState extends State<MoodNote> {
+class MoodFormDialog extends StatefulWidget {
+  const MoodFormDialog({super.key});
+
+  @override
+  State<MoodFormDialog> createState() => _MoodFormDialogState();
+}
+
+class _MoodFormDialogState extends State<MoodFormDialog> {
   final _nombreController = TextEditingController();
   final _notaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
   String _emocionSeleccionada = 'Feliz';
-
-  final List<String> _emociones = [
-    'Feliz',
-    'Triste',
-    'Enojado',
-    'Ansioso',
-    'Cansado',
-  ];
+  final List<String> _emociones = ['Feliz', 'Triste', 'Enojado', 'Ansioso', 'Cansado'];
 
   @override
   void dispose() {
@@ -32,15 +31,12 @@ class _MoodNoteState extends State<MoodNote> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-
     Navigator.pop(
       context,
-      MoodModel(
+      MoodFormResult(
         nombre: _nombreController.text.trim(),
         emocion: _emocionSeleccionada,
-        nota: _notaController.text.trim(),
-        fechaCreacion: DateTime.now(),
-        pendingSync: false,
+        nota: _notaController.text.trim().isEmpty ? null : _notaController.text.trim(),
       ),
     );
   }
@@ -57,26 +53,14 @@ class _MoodNoteState extends State<MoodNote> {
             TextFormField(
               controller: _nombreController,
               decoration: const InputDecoration(labelText: 'Nombre'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Ingrese un nombre';
-                }
-                return null;
-              },
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Ingrese un nombre' : null,
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _emocionSeleccionada,
               decoration: const InputDecoration(labelText: 'Emoción'),
-              items: _emociones.map((emocion) {
-                return DropdownMenuItem(
-                  value: emocion,
-                  child: Text(emocion),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() => _emocionSeleccionada = value!);
-              },
+              items: _emociones.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              onChanged: (v) => setState(() => _emocionSeleccionada = v!),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -88,14 +72,8 @@ class _MoodNoteState extends State<MoodNote> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: const Text('Guardar'),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        ElevatedButton(onPressed: _submit, child: const Text('Guardar')),
       ],
     );
   }
