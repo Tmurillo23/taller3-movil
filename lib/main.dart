@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'data/app_database.dart';
-import 'services/app_logger.dart';
 import 'services/mood_remote_service.dart';
 import 'services/mood_repository.dart';
 import 'pages/mood_page.dart';
@@ -16,7 +15,6 @@ Future<void> main() async {
 
   runZonedGuarded(
     () async {
-      AppLogger.info('Inicializando Mood App');
       final database = AppDatabase();
       final remoteService = MoodRemoteService();
       final repository = MoodRepository(
@@ -25,11 +23,7 @@ Future<void> main() async {
       );
       runApp(MyApp(repository: repository));
     },
-    (error, stack) => AppLogger.error(
-      'Error global no controlado',
-      error: error,
-      stackTrace: stack,
-    ),
+    (error, stack) {},
   );
 }
 

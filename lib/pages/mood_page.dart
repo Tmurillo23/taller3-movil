@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/mood_model.dart';
-import '../services/app_logger.dart';
 import '../services/mood_repository.dart';
 import '../widgets/mood_form_dialog.dart';
 import '../widgets/mood_tile.dart';
@@ -21,7 +20,6 @@ class _MoodsPageState extends State<MoodsPage> {
   @override
   void initState() {
     super.initState();
-    AppLogger.info('MoodsPage abierta');
     _loadInitialData();
   }
 
@@ -32,8 +30,7 @@ class _MoodsPageState extends State<MoodsPage> {
     });
     try {
       await widget.repository.loadInitialData();
-    } catch (e, st) {
-      AppLogger.error('Error en carga inicial', error: e, stackTrace: st);
+    } catch (e) {
       _errorMessage = 'No se pudieron cargar los datos. Intenta nuevamente.';
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -56,8 +53,7 @@ class _MoodsPageState extends State<MoodsPage> {
         nota: result.nota,
       );
       _showSnackBar('Estado de ánimo creado correctamente.');
-    } catch (e, st) {
-      AppLogger.error('Error al crear estado de ánimo', error: e, stackTrace: st);
+    } catch (e) {
       _showSnackBar('No se pudo crear el estado de ánimo.');
     }
   }
@@ -75,8 +71,7 @@ class _MoodsPageState extends State<MoodsPage> {
         nota: result.nota,
       );
       _showSnackBar('Nota actualizada correctamente.');
-    } catch (e, st) {
-      AppLogger.error('Error al actualizar la nota', error: e, stackTrace: st);
+    } catch (e) {
       _showSnackBar('No se pudo actualizar la nota.');
     }
   }
@@ -85,8 +80,7 @@ class _MoodsPageState extends State<MoodsPage> {
     try {
       await widget.repository.refreshFromRemote();
       _showSnackBar('Datos actualizados desde Firebase.');
-    } catch (e, st) {
-      AppLogger.error('Error al actualizar desde Firebase', error: e, stackTrace: st);
+    } catch (e) {
       _showSnackBar('No se pudieron actualizar los datos.');
     }
   }
@@ -95,8 +89,7 @@ class _MoodsPageState extends State<MoodsPage> {
     try {
       await widget.repository.syncPendingMoods();
       _showSnackBar('Sincronización pendiente ejecutada.');
-    } catch (e, st) {
-      AppLogger.error('Error al sincronizar pendientes', error: e, stackTrace: st);
+    } catch (e) {
       _showSnackBar('No se pudieron sincronizar las tareas pendientes.');
     }
   }
