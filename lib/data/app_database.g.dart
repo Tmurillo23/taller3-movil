@@ -1,3 +1,4 @@
+// Este archivo es generado automaticamente por Drift. No modificar a mano.
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'app_database.dart';
